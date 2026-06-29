@@ -101,7 +101,7 @@ EEMB LP602248 3,7V/620mAh
 |----------|-----------|
 | Triangulation laser (profilométrie) | ⭐⭐⭐⭐⭐ |
 | Acquisition image CMOS | ⭐⭐⭐⭐ |
-| Bluetooth Low Energy | ⭐⭐⭐⭐ |
+| Bluetooth Classic SPP (WT12-A) | ⭐⭐⭐⭐ |
 | Calcul embarqué MCU | ⭐⭐⭐⭐⭐ |
 | Alimentation Li-ion portable | ⭐⭐⭐⭐ |
 
@@ -111,7 +111,7 @@ EEMB LP602248 3,7V/620mAh
 
 Sans modification matérielle invasive, le SCANDIAG peut être étendu par :
 - Connexion PC via USB/TTL existant (pipeline Data/IA côté PC)
-- Module WiFi ESP8266 sur UART libre
+- Module WiFi **ESP8266** sur UART libre *(aucun WiFi natif sur STM32F429 ni WT12-A — module à ajouter si besoin)*
 - Capteur ToF VL53L1X sur I²C libre
 - Carte SD sur SPI libre pour logging autonome
 

@@ -12,7 +12,7 @@
 | F1 | **Triangulation laser (profilométrie)** | Laser + lentille cylindrique + caméra CMOS + MCU | ✅ Oui | ⭐⭐⭐⭐⭐ |
 | F2 | **Acquisition image** | Capteur CMOS + optique | ✅ Oui (driver caméra) | ⭐⭐⭐⭐ |
 | F3 | **Projection d'une ligne laser** | Diode laser + lentille cylindrique | ✅ Oui | ⭐⭐⭐⭐ |
-| F4 | **Communication Bluetooth Low Energy** | Module BT | ✅ Oui | ⭐⭐⭐⭐ |
+| F4 | **Communication Bluetooth Classic SPP** | Silicon Labs WT12-A | ✅ Oui | ⭐⭐⭐⭐ |
 | F5 | **Calcul embarqué** | MCU | ✅ Oui (reflaçable) | ⭐⭐⭐⭐⭐ |
 | F6 | **Stockage local** | Flash externe | ✅ Oui | ⭐⭐⭐ |
 | F7 | **Source d'alimentation autonome** | Batterie Li-ion + circuit de charge | ✅ Oui | ⭐⭐⭐⭐ |
@@ -45,9 +45,10 @@ La diode laser + lentille cylindrique produit une ligne droite précise. Réutil
 - En métrologie (alignement, planéité)
 - En détection de niveau (liquide, matière)
 
-### F4 — Bluetooth Low Energy
-Le module BT permet de transmettre des données sans fil vers un smartphone ou un PC. Applications :
-IoT industriel, capteur connecté, objet communicant autonome.
+### F4 — Bluetooth Classic SPP (Silicon Labs WT12-A)
+Le module WT12-A (BT Classic 2.1+EDR, firmware iWRAP) permet de transmettre des données sans fil
+vers un smartphone ou un PC via un **port série virtuel (SPP)**. Applications : IoT industriel,
+capteur connecté, objet communicant autonome. *⚠️ BT Classic uniquement — pas de BLE.*
 
 ### F5 — Calcul embarqué (MCU)
 Après reflash, le MCU peut exécuter n'importe quelle logique embarquée adaptée au nouveau projet :

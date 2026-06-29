@@ -10,9 +10,9 @@ flowchart TD
         direction TB
 
         subgraph ALIM["⚡ Alimentation"]
-            BAT["Li-ion 3,7V / 620mAh"]
-            CHG["Charge USB"]
-            REG["Régulateur 3,3V"]
+            BAT["EEMB LP602248\nLi-Po 3,7V / 620mAh"]
+            CHG["Charge USB Mini-B 5V/500mA\n(VDY6/B301)"]
+            REG["DC-DC LGCS/B901\n→ 3,3V & 5V"]
             BAT --> REG
             CHG --> BAT
         end
@@ -24,8 +24,8 @@ flowchart TD
             SURFACE -->|image déformée| CAM
         end
 
-        MCU["🧠 MCU\n(calcul profil,\ncontrôle laser/caméra)"]
-        BT["📡 Module BT BLE"]
+        MCU["🧠 STM32F429\n(ARM Cortex-M4 @ 180MHz)\n(calcul profil, laser/caméra)"]
+        BT["📡 WT12-A\nBT Classic 2.1+EDR / SPP"]
         FLASH["💾 Flash SPI"]
         BTNS["🔘 Boutons / LEDs"]
         ECRAN["🖥️ Écran\n(si présent)"]
@@ -36,7 +36,7 @@ flowchart TD
         REG -->|3,3V| CAM
         MCU <-->|DVP/CSI| CAM
         MCU -->|GPIO/PWM| LASER
-        MCU <-->|UART/SPI| BT
+        MCU <-->|UART iWRAP| BT
         MCU <-->|SPI| FLASH
         MCU <-->|GPIO| BTNS
         MCU <-->|I2C/SPI| ECRAN
@@ -56,7 +56,7 @@ flowchart TD
         E_IMU["🧭 IMU 6 axes\n(BMI160 → I²C/SPI)"]
         E_OLED["📟 Écran OLED\n(SSD1306 → I²C)"]
         E_SD["💿 Carte SD\n(→ SPI)"]
-        E_APP["📱 App mobile\n(→ BLE existant)"]
+        E_APP["📱 App mobile\n(→ BT Classic SPP)"]
     end
 
     USBTL <-->|USB → Python| E_PC
@@ -65,7 +65,7 @@ flowchart TD
     MCU <-->|I²C/SPI libre| E_IMU
     MCU <-->|I²C libre| E_OLED
     MCU <-->|SPI libre| E_SD
-    BT <-->|BLE| E_APP
+    BT <-->|BT Classic SPP| E_APP
 
     style PRODUIT fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
     style EXTENSIONS fill:#dcfce7,stroke:#16a34a,color:#14532d
@@ -73,6 +73,10 @@ flowchart TD
 ```
 
 ---
+
+> ⚠️ **Pas de WiFi natif** — ni le STM32F429 ni le WT12-A n'intègrent de connectivité WiFi.
+> Un module **ESP8266** sur un UART libre du MCU est nécessaire si une connectivité WiFi/IP
+> est requise (voir nœud « Extensions possibles » ci-dessus).
 
 ## Légende
 
@@ -92,4 +96,4 @@ flowchart TD
 | UART MCU → ESP8266 WiFi | Fil | Très faible | ⭐⭐⭐ |
 | I²C MCU → TOF VL53L1X | Fils | Faible | ⭐⭐ |
 | SPI → Carte SD | Fils | Faible | ⭐⭐ |
-| BLE → App mobile | Aucune | Aucune | ⭐⭐⭐⭐ |
+| BT Classic SPP (WT12-A) → App mobile/PC | Aucune | Aucune | ⭐⭐⭐⭐ |
