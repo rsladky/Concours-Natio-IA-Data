@@ -1,0 +1,30 @@
+============================================================
+  RAPPORT DE MESURE — ProfilScan (FACOM SCANDIAG® REemploi)
+============================================================
+  Date             : 2026-06-29 09:19:06
+  Surface mesurée  : Simulation — rampe
+  Points valides   : 640
+------------------------------------------------------------
+  PROFIL DE HAUTEUR
+    Minimum        : -2.970 mm
+    Maximum        : +3.045 mm
+    Étendue (Rz)   : 6.014 mm
+    Moyenne        : +0.027 mm
+    Écart-type     : 1.734 mm
+    Rugosité Ra    : 1.502 mm
+------------------------------------------------------------
+  DIAGNOSTIC IA
+    État           : Très usé ❌
+    Confiance      : 80.0%
+    Probabilités   :
+      Neuf        :   8.0%
+      Très usé    :  80.0%
+      Usé         :  12.0%
+------------------------------------------------------------
+  VERDICT
+  ⚠️  ALERTE : étendue 6.014 mm > seuil 0.500 mm
+      Inspection approfondie recommandée.
+============================================================
+  Généré par ProfilScan — Réemploi RSE FACOM SCANDIAG® (DX.TSCANPB)
+  Concours National Informatique Ynov
+============================================================
