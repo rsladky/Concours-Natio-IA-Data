@@ -20,8 +20,11 @@
   bootloader UART / DFU USB.
 
 ### 1.2 Suivi de traces PCB
-- Tracer les fils depuis le connecteur USB vers le MCU — identifier si le USB est câblé en
-  **DFU natif** (USB Device) ou via un convertisseur USB/TTL (CP2102 / CH340).
+- Le connecteur est un **USB Mini-B** (confirmé fiche produit). Tracer les fils D+ / D− depuis
+  ce connecteur vers le MCU — identifier si le USB est câblé en **DFU natif** (USB Device) ou
+  via un convertisseur USB/TTL (CP2102 / CH340).
+- L'entrée de charge est **5 V / 0,5 A** : vérifier si D+ et D− sont utilisés pour la
+  communication ou seulement pour la charge (câble d'alimentation seul vs câble données).
 - Tracer les fils du module BT vers le MCU pour localiser l'UART associé.
 
 ### 1.3 Continuité au multimètre
