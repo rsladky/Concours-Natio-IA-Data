@@ -1,6 +1,6 @@
 # Rétro-ingénierie — Schéma fonctionnel de principe
 
-> Schéma basé sur la fonction documentée du produit. À affiner avec les références réelles le jour J.
+> Schéma mis à jour avec les références réelles identifiées lors du démontage (29/06/2026).
 
 ---
 
@@ -9,23 +9,25 @@
 ```mermaid
 flowchart TD
     subgraph ALIMENTATION["⚡ Alimentation"]
-        BAT["Batterie Li-ion\n3,7 V / 0,62 Ah"]
-        CHG["Circuit de charge\nUSB (BQ24xxx)"]
-        REG["Régulateur / DC-DC\n3,7 V → 3,3 V & 5 V"]
-        USB_C["Connecteur USB\n(charge)"]
+        BAT["EEMB LP602248\nLi-Po 3,7V / 620mAh"]
+        CHG["Contrôleur charge\nVDY6/B301"]
+        REG["DC-DC LGCS/B901\n3,7V → 3,3V & 5V"]
+        USB_C["USB Mini-B\n5V / 500mA"]
         USB_C --> CHG --> BAT --> REG
     end
 
-    subgraph MCU["🧠 MCU / SoC principal"]
-        CPU["MCU principal\n(TODO : référence)"]
-        FLASH["Flash externe\nSPI"]
-        CPU <-->|SPI| FLASH
+    subgraph MCU["🧠 STM32F429 — ARM Cortex-M4 @ 180 MHz"]
+        CPU["STM32F429\n2MB Flash / 256KB RAM"]
+        SDRAM1["SDRAM Micron\n9CA15/RB151\n(buffer frames)"]
+        SDRAM2["SDRAM ISSI\nIS42Sxxxx\n(buffer frames)"]
+        CPU <-->|FMC| SDRAM1
+        CPU <-->|FMC| SDRAM2
     end
 
     subgraph MESURE["📐 Chaîne de mesure"]
-        LASER["Diode laser\n650 nm — Classe 3R"]
+        LASER["Diode laser\n≤5mW — Classe 3R"]
         LENTILLE["Lentille cylindrique\n→ ligne laser"]
-        CAM["Capteur CMOS\n(module caméra)"]
+        CAM["Capteur CMOS\n(TODO ref)\nMCLK 24MHz"]
         OPTIQUE["Optique focale fixe"]
         LASER --> LENTILLE
         LENTILLE -->|lumière structurée| SURFACE["Surface à mesurer"]
@@ -33,10 +35,9 @@ flowchart TD
     end
 
     subgraph COMM["📡 Communication"]
-        BT["Module Bluetooth\nBLE 4.x / 5.x"]
-        USBTL["Convertisseur\nUSB/TTL\n(debug/flash)"]
-        APP["Application\nmobile / PC"]
-        BT <-->|BLE| APP
+        BT["Silicon Labs WT12-A\nBT Classic 2.1+EDR\niWRAP / SPP"]
+        APP["Application\nmobile / PC\n(port série virtuel)"]
+        BT <-->|SPP BT| APP
     end
 
     subgraph UI["🖥️ Interface utilisateur"]
@@ -50,13 +51,12 @@ flowchart TD
     REG -->|3,3 V / 5 V| LASER
     REG -->|3,3 V| CAM
 
-    CPU <-->|UART / SPI / I2C| BT
-    CPU <-->|MIPI CSI / DVP / SPI| CAM
+    CPU <-->|UART| BT
+    CPU <-->|DCMI + MCLK 24MHz| CAM
     CPU -->|GPIO / PWM| LASER
     CPU <-->|GPIO| BTN
     CPU -->|GPIO| LED
-    CPU <-->|I2C / SPI| ECRAN
-    CPU <-->|UART| USBTL
+    CPU <-->|SWD SWDIO/SWDCLK| USBTL["Test pads SWD\n(flash/debug)"]
 
     CPU -->|calcul profil| BT
 ```
@@ -67,14 +67,17 @@ flowchart TD
 
 | Paramètre | Valeur connue | À mesurer/confirmer |
 |-----------|---------------|---------------------|
-| Tension batterie | 3,7 V nominale | Tension réelle à la charge |
-| Capacité batterie | 0,62 Ah (620 mAh) | Marque/référence cellule |
-| Tension logique MCU | 3,3 V (probable) | À mesurer sur le rail |
-| Tension laser | ~3,3 V ou 5 V | À mesurer sur les pads driver |
-| Interface caméra → MCU | DVP / MIPI CSI (probable) | Traces PCB ou marquage |
-| Interface BT → MCU | UART ou SPI | À confirmer par traces |
-| Classe laser | 3R (documenté) | Puissance optique max ? |
-| Autonomie | ~500 mesures | À vérifier |
+| Tension batterie | 3,7 V nominale | **EEMB LP602248 confirmé** |
+| Capacité batterie | 620 mAh / 2,3 Wh | **Confirmé étiquette batterie** |
+| MCU | STM32F429 ARM Cortex-M4 | **Confirmé marquage img#9** |
+| Fréquence MCU | 180 MHz (max) | Via PLL interne depuis HSE |
+| SDRAM | Micron 9CA15 + ISSI IS42S | **Confirmé img#9** |
+| Oscillateur caméra | 24 MHz | **Confirmé img#5 — MCLK capteur** |
+| Interface caméra → MCU | **DCMI** (STM32F429 natif) | Confirmé par MCU |
+| Interface BT → MCU | **UART** (iWRAP WT12-A) | Confirmé par WT12-A |
+| Classe laser | 3R, ≤5mW | **Confirmé étiquette produit** |
+| Connecteur de charge | USB Mini-B 5V/500mA | **Confirmé étiquette + fiche** |
+| Tension logique MCU | 3,3 V | À mesurer (probable pour STM32F429) |
 
 ---
 
