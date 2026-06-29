@@ -1,7 +1,6 @@
 # Rétro-ingénierie — Inventaire des composants
 
-> **TODO jour J :** compléter les colonnes *Référence* et *Datasheet* après ouverture du produit.  
-> Les *Fonctions exploitables* ci-dessous sont déduites de la documentation produit connue.
+> Photos du démontage archivées dans [`../assets/`](../assets/) — IMG_0346 à IMG_0350.
 
 ## Spécifications confirmées (fiche produit officielle FACOM)
 
@@ -26,33 +25,30 @@
 
 | #   | Composant                                    | Référence relevée | Fabricant probable                      | Fonction exploitable                                                                             | Datasheet archivée |
 | --- | -------------------------------------------- | ----------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------ |
-| 1   | **MCU / SoC principal**                      | *(TODO jour J)*   | STMicroelectronics / NXP / Renesas      | Calcul du profil par triangulation, contrôle des périphériques, gestion batterie, Bluetooth host | *(TODO jour J)*    |
-| 2   | **Module Bluetooth**                         | *(TODO jour J)*   | Murata / u-blox / TI CC26xx / Microchip | Communication BLE vers application mobile ; réutilisable comme module IoT autonome               | *(TODO jour J)*    |
-| 3   | **Capteur CMOS (module caméra)**             | *(TODO jour J)*   | OV76xx / OV2640 / Aptina                | Acquisition image de la ligne laser déformée ; réutilisable en vision industrielle / inspection  | *(TODO jour J)*    |
-| 4   | **Optique caméra**                           | *(TODO jour J)*   | —                                       | Focale fixe adaptée à la distance de mesure (~5–15 cm) ; à caractériser (FOV, distorsion)        | —                  |
-| 5   | **Diode laser + driver**                     | *(TODO jour J)*   | OSRAM / Sharp / Rohm                    | Projection de la ligne rouge (650 nm, classe 3R) ; réutilisable comme source structurée          | *(TODO jour J)*    |
-| 6   | **Lentille cylindrique / diffractive**       | *(TODO jour J)*   | —                                       | Transforme le point laser en ligne ; réutilisable pour tout scanner à lumière structurée         | —                  |
-| 7   | **Batterie Li-ion**                          | *(TODO jour J)*   | —                                       | 3,7 V / 0,62 Ah (621 mAh) ; réutilisable comme source 3,3–5 V pour MCU/Raspberry/Arduino         | *(TODO jour J)*    |
-| 8   | **Régulateur de tension / DC-DC**            | *(TODO jour J)*   | TI / Ricoh / Semtech                    | Conversion 3,7 V → 3,3 V (MCU) et/ou 5 V ; identifier les rails de sortie                        | *(TODO jour J)*    |
-| 9   | **Circuit de charge USB**                    | *(TODO jour J)*   | TI BQ24xxx / MPS                        | Gestion de la charge via connecteur USB ; réutilisable pour alimenter tout projet DIY            | *(TODO jour J)*    |
-| 10  | **Mémoire flash externe**                    | *(TODO jour J)*   | Winbond / Macronix                      | Stockage firmware ou logs de mesure ; accès SPI                                                  | *(TODO jour J)*    |
-| 11  | **Convertisseur USB/TTL**                    | *(TODO jour J)*   | CP2102 / CH340 / FTDI                   | Passerelle USB↔UART pour debug/flash ; peut servir de pont série DIY                             | *(TODO jour J)*    |
-| 12  | **Boutons / LEDs**                           | —                 | —                                       | UI minimaliste ; 2–3 boutons (mesure, mode, power), LED(s) d'état                                | —                  |
-| 13  | **Écran (si présent)**                       | *(TODO jour J)*   | —                                       | Affichage du résultat ; à confirmer (OLED SSD1306 / LCD ST7789 ?)                                | *(TODO jour J)*    |
-| 14  | **IMU / capteur d'inclinaison (si présent)** | *(TODO jour J)*   | Bosch BMI160 / ST LSM6                  | Détection de l'orientation du capteur, compensation de l'angle de mesure                         | *(TODO jour J)*    |
-| 15  | **Connecteur USB Mini-B**                    | USB Mini-B (confirmé) | —                               | Charge 5 V / 0,5 A ; potentiellement aussi interface de debug/flash via USB/TTL                  | —                  |
+| 1   | **MCU / SoC principal**                      | *(TODO — photo macro du gros chip IMG_0347)* | *(TODO)*  | Calcul profil, contrôle laser/caméra, gestion batterie | *(TODO)*    |
+| 2   | **Module WiFi + Bluetooth**                  | **u-blox NINA-W10x** (SN: 1934A01HDX) — ⚠️ ESP32 intégré ! | u-blox | WiFi 802.11 b/g/n + BT 5.0 + dual-core 240 MHz — reprogrammable via UART ; remplace un Raspberry Pi pour le POC | A chercher sur u-blox.com |
+| 3   | **Capteur CMOS (module caméra)**             | *(TODO — FPC à droite sur IMG_0347)*  | *(TODO)*  | Acquisition image ligne laser déformée                  | *(TODO)*    |
+| 4   | **Optique caméra**                           | *(TODO)*              | —         | Focale fixe ~5–15 cm ; à caractériser                   | —           |
+| 5   | **Diode laser + driver**                     | *(TODO)*              | *(TODO)*  | Ligne rouge ≤5mW, classe 3R, IEC 60825-1:2014 (confirmé étiquette) | *(TODO)* |
+| 6   | **Lentille cylindrique / diffractive**       | *(TODO)*              | —         | Point laser → ligne structurée                          | —           |
+| 7   | **Batterie Li-Po**                           | **EEMB LP602248** — 3,7V / 620mAh / 2,3Wh (confirmé IMG_0346) | EEMB | Alimentation portable ; réutilisable tel quel | A chercher EEMB LP602248 |
+| 8   | **Régulateur de tension / DC-DC**            | *(TODO)*              | TI / Ricoh / Semtech | 3,7V → 3,3V et/ou 5V                       | *(TODO)*    |
+| 9   | **Circuit de charge USB**                    | *(TODO)*              | TI BQ24xxx / MPS | Charge 5V/500mA via Mini-B (confirmé étiquette)    | *(TODO)*    |
+| 10  | **Mémoire flash externe**                    | *(TODO)*              | Winbond / Macronix | Stockage firmware SPI                             | *(TODO)*    |
+| 11  | **Convertisseur USB/TTL**                    | *(TODO)*              | CP2102 / CH340 | Pont UART↔USB (debug/flash du NINA-W10 via UART)    | *(TODO)*    |
+| 12  | **Boutons / LEDs**                           | *(visible IMG_0347)*  | —         | UI minimaliste                                          | —           |
+| 13  | **Connecteur USB Mini-B**                    | USB Mini-B (confirmé) | —         | Charge 5V/0,5A + potentiellement debug série            | —           |
 
 ---
 
 ## Notes de démontage
 
-*(TODO jour J — compléter en temps réel pendant l'ouverture du produit)*
-
-- **Nombre de PCB** : ___
-- **Dimensions PCB principal** : ___ mm × ___ mm
-- **Photos archivées dans** : [`../assets/`](../assets/)
-- **Marquages imprimés sur le PCB** : ___
-- **Observations particulières** : ___
+- **Nombre de PCB** : 1 PCB principal (visible IMG_0347/0349/0350)
+- **Marquage PCB** : `PCS24-E` / `3909305` (visible IMG_0347)
+- **Fabrication** : Made in Italy, Stanley Black & Decker France (69570 Dardilly)
+- **Photos archivées dans** : [`../assets/`](../assets/) — IMG_0346 à IMG_0350
+- **Découverte clé** : le module de communication est un **u-blox NINA-W10x** (ESP32 intégré), pas juste BT — ajoute WiFi et puissance de calcul embarquée !
+- **TODO** : photo macro du gros chip carré (MCU principal) sur IMG_0347 pour lire le marquage
 
 ---
 
