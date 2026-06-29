@@ -26,7 +26,7 @@
 | #   | Composant                                    | Référence relevée | Fabricant probable                      | Fonction exploitable                                                                             | Datasheet archivée |
 | --- | -------------------------------------------- | ----------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------ |
 | 1   | **MCU / SoC principal**                      | *(TODO — photo macro du gros chip IMG_0347)* | *(TODO)*  | Calcul profil, contrôle laser/caméra, gestion batterie | *(TODO)*    |
-| 2   | **Module WiFi + Bluetooth**                  | **u-blox NINA-W10x** (SN: 1934A01HDX) — ⚠️ ESP32 intégré ! | u-blox | WiFi 802.11 b/g/n + BT 5.0 + dual-core 240 MHz — reprogrammable via UART ; remplace un Raspberry Pi pour le POC | A chercher sur u-blox.com |
+| 2   | **Module Bluetooth Classic**                 | **Silicon Labs WT12-A** (FCC: QOQWT12 / IC: 5123A-BGTWT12 / SN: 1934A01HOX) | Silicon Labs (ex-Bluegiga) | Bluetooth 2.1+EDR, firmware iWRAP, pilotable via AT commands UART — SPP : apparaît comme port série virtuel sur PC/smartphone | https://www.silabs.com/wireless/bluetooth/classic/wt12 |
 | 3   | **Capteur CMOS (module caméra)**             | *(TODO — FPC à droite sur IMG_0347)*  | *(TODO)*  | Acquisition image ligne laser déformée                  | *(TODO)*    |
 | 4   | **Optique caméra**                           | *(TODO)*              | —         | Focale fixe ~5–15 cm ; à caractériser                   | —           |
 | 5   | **Diode laser + driver**                     | *(TODO)*              | *(TODO)*  | Ligne rouge ≤5mW, classe 3R, IEC 60825-1:2014 (confirmé étiquette) | *(TODO)* |
@@ -47,7 +47,7 @@
 - **Marquage PCB** : `PCS24-E` / `3909305` (visible IMG_0347)
 - **Fabrication** : Made in Italy, Stanley Black & Decker France (69570 Dardilly)
 - **Photos archivées dans** : [`../assets/`](../assets/) — IMG_0346 à IMG_0350
-- **Découverte clé** : le module de communication est un **u-blox NINA-W10x** (ESP32 intégré), pas juste BT — ajoute WiFi et puissance de calcul embarquée !
+- **Module BT identifié** : **Silicon Labs WT12-A** — Bluetooth Classic 2.1+EDR, firmware iWRAP, accessible via UART AT commands, SPP → port série virtuel sur PC
 - **TODO** : photo macro du gros chip carré (MCU principal) sur IMG_0347 pour lire le marquage
 
 ---
