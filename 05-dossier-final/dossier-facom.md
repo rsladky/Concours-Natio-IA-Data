@@ -5,15 +5,16 @@
 
 ## 1. Équipe
 
-| Nom | Classe | Campus Ynov |
-|-----|--------|-------------|
-| *(TODO jour J)* | | |
-| | | |
-| | | |
-| | | |
+| Nom | Classe |
+|-----|--------|
+| CONTI Jérémy | B3 IA DATA |
+| SLADKY Robin | B3 IA DATA |
+| MIRALLES Baptiste | B3 IA DATA |
+| AHOLOU Sophie | B3 IA DATA |
+| MERY Téo | B3 IA DATA |
+| LE COZ Tara | B3 IA DATA |
 
-**Encadrant technique :** *(TODO)*  
-**Date :** Concours National Ynov Informatique — *(TODO)*
+**Date :** Concours National Ynov Informatique — 29/06/2026
 
 ---
 
