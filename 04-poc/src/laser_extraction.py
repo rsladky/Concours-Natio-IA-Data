@@ -25,7 +25,8 @@ def extraire_ligne_laser(
         image: Image BGR uint8 (H x W x 3).
         canal: Canal à utiliser pour la détection :
             - 'rouge' : canal R de l'image BGR (optimal pour laser rouge 650 nm)
-            - 'gris'  : luminance (utile si le laser est blanc ou vert)
+            - 'vert'  : canal G de l'image BGR (optimal pour laser vert 520 nm)
+            - 'gris'  : luminance (utile si la couleur est inconnue)
         seuil: Seuil de binarisation (0–255). Si None, utilise Otsu automatiquement.
         min_pixels: Nombre minimum de pixels lumineux par colonne pour valider la détection.
             Les colonnes avec moins de pixels sont marquées NaN.
@@ -39,15 +40,19 @@ def extraire_ligne_laser(
 
     # Extraire le canal pertinent
     if canal == "rouge":
-        # Le canal rouge (indice 2 en BGR) capte mieux un laser 650 nm rouge
+        # Canal R (BGR index 2) — laser rouge 650 nm
         canal_img = image[:, :, 2].astype(np.float32)
-        # Soustraire les autres canaux pour réduire le fond coloré
         fond = image[:, :, 0].astype(np.float32) * 0.5 + image[:, :, 1].astype(np.float32) * 0.5
+        canal_img = np.clip(canal_img - fond, 0, 255).astype(np.uint8)
+    elif canal == "vert":
+        # Canal G (BGR index 1) — laser vert 520 nm
+        canal_img = image[:, :, 1].astype(np.float32)
+        fond = image[:, :, 0].astype(np.float32) * 0.5 + image[:, :, 2].astype(np.float32) * 0.5
         canal_img = np.clip(canal_img - fond, 0, 255).astype(np.uint8)
     elif canal == "gris":
         canal_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
-        raise ValueError(f"Canal inconnu : '{canal}'. Choisir 'rouge' ou 'gris'.")
+        raise ValueError(f"Canal inconnu : '{canal}'. Choisir 'rouge', 'vert' ou 'gris'.")
 
     # Seuillage
     if seuil is None:

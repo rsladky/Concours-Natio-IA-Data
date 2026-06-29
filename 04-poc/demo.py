@@ -81,6 +81,7 @@ def executer_pipeline(
     classificateur: ClassificateurUsure,
     dossier_sortie: Path,
     image: np.ndarray | None = None,
+    canal: str = "vert",
 ) -> None:
     """Exécute le pipeline complet pour un cas de test ou une image réelle.
 
@@ -110,7 +111,7 @@ def executer_pipeline(
 
     # ── Étape 2 : Extraction de la ligne laser ───────────────────────────
     print("[2/5] Extraction de la ligne laser...")
-    positions_brutes = extraire_ligne_laser(image, canal="rouge")
+    positions_brutes = extraire_ligne_laser(image, canal=canal)
     positions = lisser_positions(positions_brutes, fenetre=11, ordre=2)
     n_valides = int((~np.isnan(positions)).sum())
     print(f"      → {n_valides}/{len(positions)} colonnes détectées")
@@ -225,6 +226,12 @@ Exemples :
         help="Fichier calibration.json (si absent : calibration par défaut)",
     )
     parser.add_argument(
+        "--canal",
+        choices=["rouge", "vert", "gris"],
+        default=None,
+        help="Canal couleur de la ligne laser (auto : rouge pour synth, vert pour sources réelles)",
+    )
+    parser.add_argument(
         "--nom",
         type=str,
         default=None,
@@ -273,6 +280,16 @@ Exemples :
     clf.sauvegarder(str(chemin_modele))
     print(f"       → Modèle sauvegardé : {chemin_modele}")
 
+    # ── Résolution du canal (auto si non spécifié) ────────────────────────────
+    # Les images synthétiques ont un laser rouge ; le SCANDIAG réel émet dans le vert.
+    if args.canal is not None:
+        canal = args.canal
+    elif args.source == "synth":
+        canal = "rouge"
+    else:
+        canal = "vert"
+    print(f"\n[INIT] Canal laser : {canal}")
+
     # ── Dispatch selon --source ───────────────────────────────────────────────
     if args.source == "synth":
         # Mode synthétique : itérer sur les cas demandés
@@ -284,6 +301,7 @@ Exemples :
                 classificateur=clf,
                 dossier_sortie=dossier_sortie,
                 image=None,
+                canal=canal,
             )
 
     elif args.source == "fichier":
@@ -299,6 +317,7 @@ Exemples :
             classificateur=clf,
             dossier_sortie=dossier_sortie,
             image=image,
+            canal=canal,
         )
 
     elif args.source == "serie":
@@ -318,6 +337,7 @@ Exemples :
             classificateur=clf,
             dossier_sortie=dossier_sortie,
             image=image,
+            canal=canal,
         )
 
     elif args.source == "camera":
@@ -331,6 +351,7 @@ Exemples :
             classificateur=clf,
             dossier_sortie=dossier_sortie,
             image=image,
+            canal=canal,
         )
 
     print(f"\n{'=' * 60}")

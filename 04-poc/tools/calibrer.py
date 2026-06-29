@@ -83,7 +83,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--canal",
-        choices=["rouge", "gris"],
+        choices=["rouge", "vert", "gris"],
         default="rouge",
         help="Canal couleur de la ligne laser (défaut : rouge pour 650 nm)",
     )
