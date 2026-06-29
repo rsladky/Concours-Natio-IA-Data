@@ -30,7 +30,7 @@
 | 3   | **SDRAM externe (ISSI)**        | `IS42S` (début lisible) — img#9 bas droite | ISSI | SDRAM 16-bit, buffer image supplémentaire | issi.com |
 | 4   | **Module Bluetooth Classic**    | **Silicon Labs WT12-A** (FCC: QOQWT12, SN: 1934A01HOX) — img#1 | Silicon Labs (ex-Bluegiga) | BT 2.1+EDR, firmware iWRAP, AT commands UART → SPP port série virtuel PC | silabs.com/wt12 |
 | 5   | **Oscillateur 24 MHz**          | `24.00B / 0B98HL` — img#5 | — | Horloge MCLK du capteur caméra (typique OV2640/OV7670) | — |
-| 6   | **Capteur CMOS (caméra)**       | *(TODO — identifier via FPC)* | OmniVision probable (OV2640 ?) | Acquisition image ligne laser ; interface DCMI vers STM32F429 | *(TODO)* |
+| 6   | **Capteur CMOS (caméra)**       | **Non accessible** (module encapsulé / collé) — déduit : OmniVision OV2640 ou OV7670 probable (MCLK 24MHz + DCMI STM32F429 compatibles) | OmniVision (probable) | Acquisition image ligne laser ; interface DCMI vers STM32F429 @ 24MHz | Non disponible |
 | 7   | **Optique caméra**              | *(TODO)* | — | Focale fixe ; à caractériser (FOV, distorsion) | — |
 | 8   | **Diode laser + driver**        | *(TODO)* | — | Ligne rouge ≤5mW, classe 3R, IEC 60825-1:2014 | *(TODO)* |
 | 9   | **Lentille cylindrique**        | *(TODO)* | — | Point laser → ligne structurée | — |
