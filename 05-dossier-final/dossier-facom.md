@@ -43,47 +43,51 @@ Le SCANDIAG® fonctionne par **triangulation laser** :
 2. Un **capteur CMOS** (module caméra) observe la déformation de cette ligne.
 3. Un **MCU** calcule le profil de hauteur à partir de la déformation géométrique (principe
    de triangulation).
-4. Le résultat est transmis via **Bluetooth Low Energy** vers une application mobile ou PC.
-5. L'autonomie est assurée par une **batterie Li-ion 3,7 V / 0,62 Ah** (~500 mesures/charge).
+4. Le résultat est transmis via **Bluetooth Classic SPP** (Silicon Labs WT12-A) vers une application mobile ou PC — apparaît comme port série virtuel.
+5. L'autonomie est assurée par une **batterie Li-Po EEMB LP602248 3,7 V / 620 mAh** (~500 mesures/charge).
 
 ### 3.2 Composants identifiés
 
-> *(TODO jour J : compléter les références et joindre les datasheets)*  
-> Voir inventaire détaillé : [`../01-retro-ingenierie/composants.md`](../01-retro-ingenierie/composants.md)
+> Voir inventaire complet : [`../01-retro-ingenierie/composants.md`](../01-retro-ingenierie/composants.md)  
+> Photos du démontage : [`../assets/`](../assets/)
 
 | Composant | Référence | Fonction exploitable |
 |-----------|-----------|---------------------|
-| MCU / SoC principal | *(TODO)* | Calcul, contrôle, BT host |
-| Module Bluetooth BLE | *(TODO)* | Communication sans fil |
-| Capteur CMOS | *(TODO)* | Acquisition image |
-| Diode laser 650 nm | *(TODO)* | Projection ligne structurée |
-| Batterie Li-ion | *(TODO)* | Alimentation portable 3,7 V / 620 mAh |
-| Régulateur / DC-DC | *(TODO)* | Rail 3,3 V pour toute la logique |
-| Flash externe SPI | *(TODO)* | Stockage firmware / données |
+| **MCU principal** | **STM32F429** (ARM Cortex-M4 @ 180 MHz, 2MB Flash) | Calcul triangulation, interface caméra DCMI, UART, SWD — reflashable |
+| **Module Bluetooth** | **Silicon Labs WT12-A** (iWRAP firmware) | BT Classic SPP → port série virtuel PC/mobile |
+| **SDRAM ×2** | Micron `9CA15/RB151` + ISSI `IS42S` | Buffer frames caméra (FMC STM32F429) |
+| **Oscillateur** | 24 MHz (`24.00B`) | Horloge MCLK du capteur caméra |
+| **Capteur CMOS** | *(à identifier — connecteur FPC)* | Acquisition image ligne laser (DCMI) |
+| **Diode laser** | ≤5mW, classe 3R (confirmé étiquette) | Ligne structurée rouge |
+| **Batterie** | **EEMB LP602248** — 3,7V / 620mAh / 2,3Wh | Alimentation portable |
+| **DC-DC** | `LGCS/B901` + 2 inductances | Rails 3,3V et 5V |
+| **Charge Li-Po** | `VDY6/B301` | Charge via USB Mini-B 5V/500mA |
+| **Connecteur charge** | USB Mini-B (confirmé) | 5V/500mA |
 
 ### 3.3 Schéma fonctionnel
 
 > Voir schéma Mermaid complet : [`../01-retro-ingenierie/schema-fonctionnel.md`](../01-retro-ingenierie/schema-fonctionnel.md)
 
-Synthèse :
-
 ```
-Batterie Li-ion 3,7V
+EEMB LP602248 3,7V/620mAh
        │
-   [DC-DC / Régulateur] → 3,3V
+   [VDY6/B301 charge] ← USB Mini-B 5V/500mA
        │
-   [MCU] ─── DVP/CSI ───→ [Caméra CMOS]
-       │                       ↑
-       ├── GPIO/PWM ───→ [Driver laser] ─→ [Laser 650nm] ─→ [Lentille cylindrique]
-       ├── UART/SPI ───→ [Module BT BLE] ──── BLE ───→ App mobile
-       ├── SPI ─────────→ [Flash externe]
-       └── GPIO ─────→ [Boutons / LEDs / Écran]
-       UART ─────────→ [USB/TTL] ──── USB ───→ PC (debug/flash)
+   [LGCS/B901 DC-DC] → 3,3V
+       │
+   [STM32F429 @ 180MHz]
+       ├── DCMI + MCLK 24MHz ──→ [Caméra CMOS]
+       │                               ↑
+       ├── GPIO ──→ [Driver laser] ──→ [Laser ≤5mW 3R] ──→ [Lentille] ──→ Surface
+       ├── FMC ───→ [SDRAM Micron] + [SDRAM ISSI]  (buffer frames)
+       ├── UART ──→ [Silicon Labs WT12-A] ──── BT SPP ────→ App PC/mobile
+       ├── GPIO ──→ [Boutons / LEDs]
+       └── SWD ───→ [Test pads SWDIO/SWDCLK]  (flash/debug)
 ```
 
 ### 3.4 Datasheets archivées
 
-> *(TODO jour J : joindre les PDF dans `../01-retro-ingenierie/datasheets/`)*
+> Voir [`../01-retro-ingenierie/datasheets/`](../01-retro-ingenierie/datasheets/)
 
 ---
 
