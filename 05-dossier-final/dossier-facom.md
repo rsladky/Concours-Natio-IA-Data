@@ -5,14 +5,14 @@
 
 ## 1. Équipe
 
-| Nom | Classe |
-|-----|--------|
-| CONTI Jérémy | B3 IA DATA |
-| SLADKY Robin | B3 IA DATA |
-| MIRALLES Baptiste | B3 IA DATA |
-| AHOLOU Sophie | B3 IA DATA |
-| MERY Téo | B3 IA DATA |
-| LE COZ Tara | B3 IA DATA |
+| Nom | Classe | Campus Ynov |
+|-----|--------|-------------|
+| CONTI Jérémy | B3 IA DATA | Aix-en-Provence |
+| SLADKY Robin | B3 IA DATA | Aix-en-Provence |
+| MIRALLES Baptiste | B3 IA DATA | Aix-en-Provence |
+| AHOLOU Sophie | B3 IA DATA | Aix-en-Provence |
+| MERY Téo | B3 IA DATA | Aix-en-Provence |
+| LE COZ Tara | B3 IA DATA | Aix-en-Provence |
 
 **Date :** Concours National Ynov Informatique — 29/06/2026
 
