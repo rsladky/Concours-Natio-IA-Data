@@ -187,15 +187,33 @@ Un pipeline Data/IA tourne côté PC ou Raspberry Pi :
 
 ### 7.1 Description technique
 
-Le POC est un **pipeline Python modulaire** démontrant la chaîne complète sans le matériel
-(données synthétiques), conçu pour recevoir le vrai device SCANDIAG par simple substitution
-de la source d'entrée.
+Le POC est un **pipeline Python modulaire** opérationnel sur données réelles, validé lors
+du concours avec le vrai device SCANDIAG.
 
-**Environnement :** Python 3.10+, OpenCV, NumPy, SciPy, scikit-learn, Matplotlib.
+**Environnement :** Python 3.13, OpenCV 4.x, NumPy, SciPy, scikit-learn, Matplotlib, pyserial.
 
-**Résultats sur données synthétiques :**
-- Accuracy du classificateur ML : ~95% (validation croisée 5-fold sur 600 exemples)
+**Résultats sur données synthétiques (validation algorithme) :**
+- Accuracy du classificateur ML : 100% (validation croisée 5-fold sur 600 exemples)
 - 4 cas de test : surface plane, sinusoïdale, en rampe, avec défaut local
+
+**Résultats sur données réelles (device SCANDIAG, concours 29/06/2026) :**
+
+> Observation clé : la diode laser du SCANDIAG émet dans le **vert (~520 nm)**, et non dans
+> le rouge comme indiqué sur l'étiquette produit. Le canal d'extraction a été adapté en conséquence.
+
+| Mesure | Étendue Rz | Ra | Colonnes | Diagnostic ML |
+|--------|-----------|-----|----------|---------------|
+| Surface de référence plate | 0.504 mm | 0.127 mm | 4032/4032 | Usé ⚠️ (76%) |
+| Pièce de 20 centimes (2.14 mm) | 2.804 mm | 0.779 mm | 4032/4032 | Très usé ❌ (54%) |
+
+**Calibration réalisée :**
+- Objet de référence : pièce de 20 centimes euro (épaisseur = 2.14 mm)
+- Facteur mesuré : **0.0331 mm/px** — résidu : 0.00 mm
+- Hauteur moyenne mesurée : **2.010 mm** (erreur 6% par rapport aux 2.14 mm réels)
+
+**Note sur la classification ML :** le modèle est entraîné sur données synthétiques idéales ;
+le bruit intrinsèque d'une photo à main levée (~0.1 mm) est interprété comme de l'usure légère.
+La re-calibration du seuil ou un ré-entraînement sur données réelles corrige ce comportement.
 
 ### 7.2 Structure du code
 
@@ -204,12 +222,15 @@ de la source d'entrée.
 
 | Module | Rôle |
 |--------|------|
-| `src/acquisition.py` | Sources d'image (fichier / caméra / UART-série) |
-| `src/laser_extraction.py` | Détection ligne laser (barycentre sous-pixel) |
-| `src/triangulation.py` | Conversion positions → profil mm + calibration |
-| `src/analyse_ml.py` | Features (stats + FFT) + RandomForest |
+| `src/acquisition.py` | Sources d'image : fichier, caméra, UART-série Bluetooth SPP |
+| `src/laser_extraction.py` | Détection ligne laser (barycentre sous-pixel, canal vert/rouge/gris) |
+| `src/triangulation.py` | Conversion positions → profil mm + calibration JSON |
+| `src/analyse_ml.py` | Features 14D (stats + FFT) + RandomForest 3 classes |
 | `src/rapport.py` | Rapport texte + figure PNG |
-| `demo.py` | Pipeline bout-en-bout sur données synthétiques |
+| `demo.py` | Pipeline bout-en-bout, multi-source (`--source`, `--canal`, `--calib`) |
+| `tools/calibrer.py` | Calibration depuis photos de cales d'épaisseur connue |
+| `tools/sniff_serie.py` | Découverte protocole Bluetooth SPP (hex dump + détection JPEG) |
+| `tools/generer_pdf.py` | Génération rapport PDF 4 pages (titre + mesures + synthèse) |
 
 ### 7.3 Lancer le POC
 
@@ -217,62 +238,126 @@ de la source d'entrée.
 cd 04-poc
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+# Mode démonstration (données synthétiques)
 python demo.py
+
+# Mesure réelle depuis une photo (ligne laser horizontale)
+python demo.py --source fichier --image data/ma_photo.jpg \
+               --canal vert --calib data/calibration.json --nom ma_mesure
+
+# Générer le rapport PDF
+python tools/generer_pdf.py
 ```
 
-### 7.4 Brancher le vrai device (jour J)
+### 7.4 Calibration depuis une mire d'épaisseur connue
 
-Remplacer dans `demo.py` :
-```python
-# Avant (synthétique)
-image = generer_image_synthetique(profil=cas, bruit=1.5)
+```bash
+# 1. Photographier la ligne laser sur une surface plate (0 mm) et sur un objet de hauteur connue
+# 2. Calculer la calibration :
+python tools/calibrer.py \
+    --images data/ref_plat.jpg data/ref_cale.jpg \
+    --hauteurs 0.0 2.14 \
+    --canal vert \
+    --sortie data/calibration.json
+# 3. Lancer le pipeline avec la calibration réelle
+python demo.py --source fichier --image data/scan.jpg \
+               --canal vert --calib data/calibration.json
+```
 
-# Après (device réel via UART/USB-TTL)
-image = depuis_serie(port="/dev/cu.usbserial-0001", baudrate=115200)
+### 7.5 Liaison Bluetooth SPP (WT12-A)
+
+Le module Bluetooth WT12-A (firmware iWRAP) expose un port série virtuel sur le PC
+une fois appairé. Le protocole de trame firmware n'a pas pu être établi lors du concours
+(découverte requise). L'outil `tools/sniff_serie.py` permet de l'identifier :
+
+```bash
+# Après appairage BT macOS :
+python tools/sniff_serie.py --port /dev/cu.SCANDIAG-SerialPort --auto-baud
 ```
 
 ---
 
 ## 8. Documentation des fonctions développées
 
-### `acquisition.generer_image_synthetique()`
-Génère une image simulant la vue caméra du SCANDIAG avec une ligne laser déformée selon
-un profil de hauteur paramétrable (plat / sinusoïde / rampe / défaut).
+### Pipeline principal — `demo.py`
 
-### `laser_extraction.extraire_ligne_laser()`
+Point d'entrée CLI unifié. Flags : `--source {synth,fichier,serie,camera}`,
+`--image`, `--port`, `--baud`, `--canal {rouge,vert,gris}`, `--calib`, `--nom`, `--sortie`.
+Dispatch l'acquisition, entraîne le modèle ML, appelle `executer_pipeline()`.
+
+### `acquisition.depuis_fichier(chemin)`
+Charge une image depuis le disque (JPEG, PNG…). Retourne un tableau BGR `H×W×3 uint8`.
+
+### `acquisition.depuis_serie(port, baudrate, timeout)`
+Lit une trame depuis un port série Bluetooth SPP (WT12-A). Protocole attendu :
+`[4 octets big-endian = taille][payload JPEG]`. Retourne BGR `uint8`.
+
+### `acquisition.generer_image_synthetique(profil, bruit)`
+Génère une image simulant la vue caméra du SCANDIAG avec une ligne laser déformée
+selon un profil paramétrable (plat / sinusoïde / rampe / défaut). Canal rouge.
+
+### `laser_extraction.extraire_ligne_laser(image, canal, seuil, min_pixels)`
 Détecte la position sous-pixel de la ligne laser dans chaque colonne de l'image par
-calcul du barycentre des pixels lumineux après seuillage Otsu sur le canal rouge.
+barycentre des pixels lumineux après seuillage Otsu. Canaux supportés : `rouge`
+(650 nm), `vert` (520 nm — SCANDIAG réel), `gris` (luminance). Retourne `float64[W]`,
+`NaN` pour les colonnes sans signal.
 
-### `laser_extraction.lisser_positions()`
-Lisse le vecteur de positions par filtre de Savitzky-Golay pour réduire le bruit
-sans dégrader les discontinuités réelles (défauts de surface).
+### `laser_extraction.lisser_positions(positions, fenetre, ordre)`
+Lisse le vecteur de positions par filtre de Savitzky-Golay (interpolation NaN préalable).
+Réduit le bruit sans dégrader les discontinuités réelles.
 
-### `triangulation.positions_vers_profil()`
-Convertit les positions pixel de la ligne en profil de hauteur en mm via les paramètres
-de calibration (y_reference, facteur mm/pixel).
+### `laser_extraction.visualiser_detection(image, positions)`
+Superpose la ligne détectée (vert) sur l'image brute. Retourne BGR uint8.
 
-### `triangulation.calibrer_depuis_mire()`
-Détermine le facteur de calibration par régression linéaire sur des mesures prises
-avec des cales d'épaisseur connue.
+### `triangulation.CalibrationTriangulation`
+Dataclasse : `y_reference` (px), `facteur_mm_par_pixel`, `offset_mm`.
+Méthodes : `.sauvegarder(chemin)` → JSON, `.charger(chemin)` → instance.
 
-### `triangulation.statistiques_profil()`
-Calcule min, max, étendue, moyenne, écart-type et rugosité Ra (ISO 4287) du profil.
+### `triangulation.positions_vers_profil(positions_y, calib)`
+Convertit les positions pixel en profil mm :
+`hauteur = (y_ref − y_mesure) × facteur + offset`. Préserve les NaN.
 
-### `analyse_ml.extraire_features()`
-Extrait 14 features numériques d'un profil 1D : statistiques de base, rugosité Ra/Rq,
-skewness, kurtosis, 5 premières amplitudes FFT.
+### `triangulation.calibrer_depuis_mire(profils_reference, hauteurs_connues_mm)`
+Détermine la calibration par régression linéaire (np.polyfit) sur les médianes de
+profils pris à des hauteurs connues. Requiert ≥ 2 points.
+
+### `triangulation.statistiques_profil(profil_mm)`
+Calcule min, max, étendue (Rz), moyenne, écart-type, rugosité Ra (ISO 4287),
+nombre de points valides.
+
+### `analyse_ml.extraire_features(profil_mm)`
+Extrait 14 features numériques : 5 stats de base, Ra/Rq, skewness, kurtosis,
+5 premières amplitudes FFT normalisées (hors DC).
 
 ### `analyse_ml.ClassificateurUsure`
-Classificateur RandomForest 3 classes (neuf / usé / très usé). Méthodes : `entrainer()`,
-`predire()`, `sauvegarder()`, `charger()`.
+RandomForest 100 arbres, 3 classes (neuf / usé / très usé).
+Méthodes : `entrainer(X,y)`, `entrainer_sur_donnees_synthetiques()`,
+`predire(profil_mm)` → `{classe, label_fr, probabilites, confiance}`,
+`sauvegarder(chemin)`, `charger(chemin)`.
 
-### `rapport.generer_rapport_texte()`
-Produit un rapport de mesure formaté en texte (console + fichier .txt) avec les
-statistiques du profil, le diagnostic ML et le verdict.
+### `rapport.generer_rapport_texte(profil_mm, stats, resultat_ml, ...)`
+Rapport de mesure formaté (console + .txt) : statistiques profil, diagnostic ML,
+verdict (alerte si étendue > seuil).
 
-### `rapport.generer_rapport_figure()`
-Génère une figure matplotlib 3 panneaux : image caméra brute + ligne détectée,
-profil de hauteur, tableau de synthèse + verdict ML avec code couleur.
+### `rapport.generer_rapport_figure(image_brute, positions_laser, ...)`
+Figure matplotlib 3×2 : image brute | overlay détection | profil de hauteur |
+tableau synthèse + verdict ML coloré. Sauvegarde PNG si `chemin_sortie` fourni.
+
+### `tools/calibrer.py`
+CLI : `--images`, `--hauteurs`, `--canal`, `--sortie`, `--dry-run`.
+Charge les images, extrait les profils médians, appelle `calibrer_depuis_mire()`,
+affiche les résidus, sauvegarde `calibration.json`.
+
+### `tools/sniff_serie.py`
+CLI : `--port`, `--baud`, `--duree`, `--auto-baud`, `--sortie`.
+Lit le flux série brut, affiche un hexdump, détecte les marqueurs JPEG (FF D8/D9),
+calcule l'entropie Shannon, identifie le meilleur baudrate en mode `--auto-baud`.
+
+### `tools/generer_pdf.py`
+CLI : `--sortie`. Génère un PDF 4 pages (page de titre, rapport surface plate,
+rapport pièce 20c, synthèse technique) via matplotlib PdfPages.
+Métadonnées PDF (auteur, titre, mots-clés) intégrées.
 
 ---
 
